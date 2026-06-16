@@ -4,6 +4,8 @@ import numpy as np
 import tkinter as tk
 from pathlib import Path
 import pandas as pd
+import pyarrow as pa
+import pyarrow.parquet as pq
 
 
 def file_selection():
@@ -13,8 +15,8 @@ def file_selection():
     return Path(folder)
 
 
-def image(folder):
-    images_data = []
+def image(folder, output_path = r"G:\Edgar_workspace\MogoMogo_2023\RGB_data.csv"):
+
     for i in folder.iterdir():
         site = i.parent.name
         for file in i.iterdir():
@@ -29,11 +31,7 @@ def image(folder):
 
             r, g, b = arr[:, :, 0], arr[:, :, 1], arr[:, :, 2]
             # Distribución de cada canal
-            mean_rgb = (
-                0.299 * r.astype(float)
-                + 0.587 * g.astype(float)
-                + 0.114 * b.astype(float)
-            )
+           # mean_rgb = (0.299 * r.astype(float)+ 0.587 * g.astype(float)      + 0.114 * b.astype(float)   )
 
             datas = file.stem.split("_")
             IDs = datas[0]
@@ -44,27 +42,26 @@ def image(folder):
                     "site": site,
                     "Date": Date,
                     "ID": IDs,
-                    "meanRGB": mean_rgb.flatten(),
                     "R": r.flatten(),
                     "G": g.flatten(),
                     "B": b.flatten(),
                 }
             )
-            images_data.append(df_img)
+            
+            table = pa.Table.from_pandas(df_img, preserve_index=False)
 
-    return pd.concat(images_data, ignore_index=True)
+            pq.write_to_dataset(
+            table,
+            root_path="dataset_pixels",
+             partition_cols=["ID"]
+            )
+            print(f"Processed {file.name}: {len(df_img):,} pixels")
 
-
-def save_data(images_data):
-    output_path = r"C:\Users\jandr\Downloads\RGB_data.csv"
-    images_data.to_csv(output_path, index=False)
-    print(images_data)
 
 
 def main():
     folder = file_selection()
-    images_data = image(folder)
-    save_data(images_data)
+    image(folder)
 
 
 main()
