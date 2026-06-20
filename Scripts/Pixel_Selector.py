@@ -23,6 +23,7 @@ class Pixel_selector:
         self.types = tk.StringVar(value="Type 1")
         self.zoom_factor = 1
         self.zoom_step = 1.1
+
         container = tk.Frame(root, bg=PANEL)
         container.pack(fill="x")
         tk.Label(
@@ -35,7 +36,23 @@ class Pixel_selector:
         main = tk.Frame(self.root, bg=BG)
         main.pack(fill="both", expand=True, padx=5, pady=5)
 
-        self.canvas = tk.Canvas(main, bg=BG, cursor="crosshair")
+        self.h_scroll = tk.Scrollbar(main, orient="horizontal")
+        self.v_scroll = tk.Scrollbar(main, orient="vertical")
+
+        self.canvas = tk.Canvas(
+            main,
+            bg=BG,
+            cursor="crosshair",
+            xscrollcommand=self.h_scroll.set,
+            yscrollcommand=self.v_scroll.set,
+        )
+
+        self.v_scroll.config(command=self.canvas.yview)
+        self.h_scroll.config(command=self.canvas.xview)
+
+        self.v_scroll.pack(side="right", fill="y")
+        self.h_scroll.pack(side="bottom", fill="x")
+
         self.canvas.pack(side="left", fill="both", expand=True)
 
         btn_frame = tk.Frame(root, bg=BG)
@@ -87,7 +104,7 @@ class Pixel_selector:
         ttk.Combobox(
             btn_frame,
             textvariable=self.types,
-            values=["Type 1", "Type 2"],
+            values=["Type 1", "Type 3"],
             state="readonly",
             width=12,
         ).pack()
@@ -125,8 +142,8 @@ class Pixel_selector:
         self.tk_image = ImageTk.PhotoImage(pil_img)
 
         self.canvas.delete("all")
-        self.img_canvas_x_position = (canvas_width - new_w) // 2
-        self.img_canvas_y_position = (canvas_height - new_h) // 2
+        self.img_canvas_x_position = max(0, (canvas_width - new_w) // 2)
+        self.img_canvas_y_position = max(0, (canvas_height - new_h) // 2)
         self.canvas.create_image(
             self.img_canvas_x_position,
             self.img_canvas_y_position,
@@ -134,27 +151,30 @@ class Pixel_selector:
             image=self.tk_image,
         )
 
+        self.canvas.config(
+            scrollregion=(
+                0,
+                0,
+                max(canvas_width, new_w + self.img_canvas_x_position),
+                max(canvas_height, new_h + self.img_canvas_y_position),
+            )
+        )
+
     def on_click(self, event):
         self.coords = []
         h, w = self.image.shape[:2]
 
-        relative_x_position = event.x - self.img_canvas_x_position
-        relative_y_position = event.y - self.img_canvas_y_position
+        canvas_x = self.canvas.canvasx(event.x)
+        canvas_y = self.canvas.canvasy(event.y)
+
+        relative_x_position = canvas_x - self.img_canvas_x_position
+        relative_y_position = canvas_y - self.img_canvas_y_position
 
         Real_x = int(relative_x_position / self.display_scale)
         Real_y = int(relative_y_position / self.display_scale)
 
         self.coords.append((Real_x, Real_y))
 
-        print(
-            f"event=({event.x},{event.y})",
-            f"img_origin=({self.img_canvas_x_position},{self.img_canvas_y_position})",
-            f"rx={relative_x_position}",
-            f"ry={relative_y_position}",
-            f"scale={self.display_scale}",
-            f"Real_x={Real_x}",
-            f"Real_y={Real_y}",
-        )
         for dx in range(-3, 4):
             for dy in range(-3, 4):
                 nx = Real_x + dx
@@ -244,7 +264,6 @@ class Pixel_selector:
             self.arr = np.array(img)
             self.image_path = images
             self.extract_data()
-
 
 
 if __name__ == "__main__":
