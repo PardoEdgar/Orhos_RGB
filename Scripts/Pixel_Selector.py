@@ -114,13 +114,15 @@ class Pixel_selector:
 
         img = cv2.imread(path)
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        print("shape:", img.shape)
         self.image = img
+        self.arr = np.array(img)
+        self.hsv_arr = cv2.cvtColor(img, cv2.COLOR_RGB2HSV)
+        self.lab_arr = cv2.cvtColor(img, cv2.COLOR_RGB2LAB)
+
+        print("shape:", img.shape)
         self.display_image(img)
         self.path = path
         self.image_path = Path(path)
-
-        self.arr = np.array(img)
 
     def display_image(self, img):
         self.canvas.update_idletasks()
@@ -183,8 +185,15 @@ class Pixel_selector:
         r = self.arr[Real_y, Real_x, 0]
         g = self.arr[Real_y, Real_x, 1]
         b = self.arr[Real_y, Real_x, 2]
-
-        self.pixel_label.config(text=f"Pixel ({Real_x}, {Real_y}); R={r},G={g},B={b}")
+        h = self.hsv_arr[Real_y, Real_x, 0]
+        s = self.hsv_arr[Real_y, Real_x, 1]
+        v = self.hsv_arr[Real_y, Real_x, 2]
+        l_lab = self.lab_arr[Real_y, Real_x, 0]
+        a_lab = self.lab_arr[Real_y, Real_x, 1]
+        b_lab = self.lab_arr[Real_y, Real_x, 2]
+        self.pixel_label.config(
+            text=f"Pixel ({Real_x}, {Real_y}); R={r},G={g},B={b}; h={h},s={s},v={v}; l={l_lab},a={a_lab},b={b_lab}"
+        )
         self.draw_pixels()
 
     def extract_data(self, output_path=r"C:\Users\jandr\Downloads"):
@@ -193,6 +202,14 @@ class Pixel_selector:
             r = self.arr[y, x, 0]
             g = self.arr[y, x, 1]
             b = self.arr[y, x, 2]
+
+            h = self.hsv_arr[y, x, 0]
+            s = self.hsv_arr[y, x, 1]
+            v = self.hsv_arr[y, x, 2]
+
+            l_lab = self.lab_arr[y, x, 0]
+            a_lab = self.lab_arr[y, x, 1]
+            b_lab = self.lab_arr[y, x, 2]
 
             datas = self.image_path.stem.split("_")
             IDs = datas[0]
@@ -212,6 +229,12 @@ class Pixel_selector:
                     "R": float(r),
                     "G": float(g),
                     "B": float(b),
+                    "h": float(h),
+                    "s": float(s),
+                    "v": float(v),
+                    "l_lab": float(l_lab),
+                    "a_lab": float(a_lab),
+                    "b_lab": float(b_lab),
                     "Type": self.types.get(),
                 }
             )
