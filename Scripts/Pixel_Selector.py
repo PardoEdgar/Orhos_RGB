@@ -21,8 +21,11 @@ class Pixel_selector:
         self.coords = []
         self.image_path = None
         self.types = tk.StringVar(value="Type 1")
+        self.target = tk.StringVar(value="Red")
         self.zoom_factor = 1
         self.zoom_step = 1.1
+
+        self.text = tk.StringVar(value="Text")
 
         container = tk.Frame(root, bg=PANEL)
         container.pack(fill="x")
@@ -31,35 +34,48 @@ class Pixel_selector:
             text="Pixel intensity extraction",
             bg=PANEL,
             fg=ACCENT,
-        ).pack(padx=15, pady=15, anchor="w")
+        ).pack(padx=20, pady=20, anchor="w")
 
-        main = tk.Frame(self.root, bg=BG)
-        main.pack(fill="both", expand=True, padx=5, pady=5)
+        self.notebook = ttk.Notebook(root)
+        self.notebook.pack(fill="both", expand=True, padx=10, pady=10)
 
-        self.h_scroll = tk.Scrollbar(main, orient="horizontal")
-        self.v_scroll = tk.Scrollbar(main, orient="vertical")
+        self.tab_1 = tk.Frame(self.notebook, bg=BG)
+        self.notebook.add(self.tab_1, text="Pixel Selector")
 
-        self.canvas = tk.Canvas(
-            main,
+        self.tab_2 = tk.Frame(self.notebook, bg=BG)
+        self.notebook.add(self.tab_2, text="Color Card")
+
+        self.build_tab_1()
+        self.build_tab_2()
+
+    def build_tab_1(self):
+
+        btn_frame_1 = tk.Frame(self.tab_1, bg=BG)
+        btn_frame_1.pack(side="bottom", fill="x", padx=5, pady=10)
+
+        main_1 = tk.Frame(self.tab_1, bg=BG)
+        main_1.pack(fill="both", expand=True, padx=10, pady=10)
+
+        self.h_scroll = tk.Scrollbar(main_1, orient="horizontal")
+        self.v_scroll = tk.Scrollbar(main_1, orient="vertical")
+
+        self.canvas_1 = tk.Canvas(
+            main_1,
             bg=BG,
             cursor="crosshair",
             xscrollcommand=self.h_scroll.set,
             yscrollcommand=self.v_scroll.set,
         )
 
-        self.v_scroll.config(command=self.canvas.yview)
-        self.h_scroll.config(command=self.canvas.xview)
-
+        self.v_scroll.config(command=self.canvas_1.yview)
+        self.h_scroll.config(command=self.canvas_1.xview)
         self.v_scroll.pack(side="right", fill="y")
         self.h_scroll.pack(side="bottom", fill="x")
 
-        self.canvas.pack(side="left", fill="both", expand=True)
+        self.canvas_1.pack(side="left", fill="both", expand=True)
 
-        btn_frame = tk.Frame(root, bg=BG)
-        btn_frame.pack(side="left", fill="x", padx=5, pady=10)
-
-        self.btn = tk.Button(
-            btn_frame,
+        self.btn_1 = tk.Button(
+            btn_frame_1,
             text="Load Image",
             bg=ACCENT,
             fg="black",
@@ -68,10 +84,10 @@ class Pixel_selector:
             pady=5,
             command=self.load_image,
         )
-        self.btn.pack(side="left", pady=10, padx=40, fill="x")
+        self.btn_1.pack(side="left", pady=10, padx=40, fill="x")
 
         self.btn_2 = tk.Button(
-            btn_frame,
+            btn_frame_1,
             text="save data",
             bg=ACCENT,
             fg="black",
@@ -81,30 +97,111 @@ class Pixel_selector:
             command=self.images_date,
         )
         self.btn_2.pack(side="left", pady=10, padx=40, fill="x")
-
-        self.btn_zoom_in = tk.Button(btn_frame, text="+", command=self.zoom_in)
+        self.btn_zoom_in = tk.Button(btn_frame_1, text="+", command=self.zoom_in)
         self.btn_zoom_in.pack(side="left", pady=10, padx=40, fill="x")
-
-        self.btn_zoom_out = tk.Button(btn_frame, text="-", command=self.zoom_out)
+        self.btn_zoom_out = tk.Button(btn_frame_1, text="-", command=self.zoom_out)
         self.btn_zoom_out.pack(side="left", pady=10, padx=40, fill="x")
 
         # Events
-        self.canvas.bind("<ButtonPress-1>", self.on_click)
+        self.canvas_1.bind("<ButtonPress-1>", self.on_click)
 
-        self.pixel_label = tk.Label(btn_frame, text="pixel ---", bg=BG, fg="white")
-        self.pixel_label.pack(side="right", padx=20)
+        self.pixel_label_1 = tk.Label(btn_frame_1, text="pixel ---", bg=BG, fg="white")
+        self.pixel_label_1.pack(side="right", padx=20)
 
         tk.Label(
-            btn_frame,
+            btn_frame_1,
+            text="IDs",
+            bg=PANEL,
+            fg=ACCENT,
+        ).pack(anchor="c", pady=(5, 5))
+
+        entry = ttk.Entry(btn_frame_1, textvariable=self.text, state="normal", width=12)
+        entry.pack()
+
+        tk.Label(
+            btn_frame_1,
             text="Colony Type",
+            bg=PANEL,
+            fg=ACCENT,
+        ).pack(anchor="c", pady=(10, 10))
+
+        ttk.Combobox(
+            btn_frame_1,
+            textvariable=self.types,
+            values=["Type 1", "Type 3"],
+            state="readonly",
+            width=12,
+        ).pack()
+
+    def build_tab_2(self):
+        btn_frame_2 = tk.Frame(self.tab_2, bg=BG)
+        btn_frame_2.pack(side="bottom", fill="x", padx=5, pady=10)
+
+        main_2 = tk.Frame(self.tab_2, bg=BG)
+        main_2.pack(fill="both", expand=True, padx=10, pady=10)
+
+        self.h_scroll = tk.Scrollbar(main_2, orient="horizontal")
+        self.v_scroll = tk.Scrollbar(main_2, orient="vertical")
+
+        self.canvas_2 = tk.Canvas(
+            main_2,
+            bg=BG,
+            cursor="crosshair",
+            xscrollcommand=self.h_scroll.set,
+            yscrollcommand=self.v_scroll.set,
+        )
+
+        self.v_scroll.config(command=self.canvas_2.yview)
+        self.h_scroll.config(command=self.canvas_2.xview)
+        self.v_scroll.pack(side="right", fill="y")
+        self.h_scroll.pack(side="bottom", fill="x")
+
+        self.canvas_2.pack(side="left", fill="both", expand=True)
+
+        self.btn_1_tab_2 = tk.Button(
+            btn_frame_2,
+            text="Load Image",
+            bg=ACCENT,
+            fg="black",
+            relief="flat",
+            padx=40,
+            pady=5,
+            command=self.load_image,
+        )
+        self.btn_1_tab_2.pack(side="left", pady=10, padx=40, fill="x")
+        self.btn_2_tab_2 = tk.Button(
+            btn_frame_2,
+            text="save data",
+            bg=ACCENT,
+            fg="black",
+            relief="flat",
+            padx=40,
+            pady=5,
+            command=self.images_date,
+        )
+        self.btn_2_tab_2.pack(side="left", pady=10, padx=40, fill="x")
+        self.btn_zoom_in = tk.Button(btn_frame_2, text="+", command=self.zoom_in)
+        self.btn_zoom_in.pack(side="left", pady=10, padx=40, fill="x")
+        self.btn_zoom_out = tk.Button(btn_frame_2, text="-", command=self.zoom_out)
+        self.btn_zoom_out.pack(side="left", pady=10, padx=40, fill="x")
+
+        # Events
+        self.canvas_2.bind("<ButtonPress-1>", self.on_click)
+
+        self.pixel_label_2 = tk.Label(btn_frame_2, text="pixel ---", bg=BG, fg="white")
+        self.pixel_label_2.pack(side="right", padx=20)
+
+        tk.Label(
+            btn_frame_2,
+            text="Color target",
             bg=PANEL,
             fg=ACCENT,
         ).pack(anchor="c", pady=(5, 5))
 
         ttk.Combobox(
-            btn_frame,
-            textvariable=self.types,
-            values=["Type 1", "Type 3"],
+            btn_frame_2,
+            textvariable=self.target,
+            values=["Red", "yellow", "Black"],
             state="readonly",
             width=12,
         ).pack()
@@ -236,6 +333,7 @@ class Pixel_selector:
                     "a_lab": float(a_lab),
                     "b_lab": float(b_lab),
                     "Type": self.types.get(),
+                    "IDs": self.text.get(),
                 }
             )
         df_img = pd.DataFrame(records)
@@ -253,7 +351,9 @@ class Pixel_selector:
             index=False,
         )
 
-        print(f"Processed {self.image_path.name}: {len(df_img):,} pixels")
+        print(
+            f"{len(df_img):,} pixels from {self.image_path.name} were saved in {csv_path}"
+        )
 
     def draw_pixels(self):
         for x, y in self.coords:
@@ -287,6 +387,22 @@ class Pixel_selector:
             self.arr = np.array(img)
             self.image_path = images
             self.extract_data()
+
+    @property
+    def canvas(self):
+        active = self.notebook.index(self.notebook.select())
+        if active == 0:
+            return self.canvas_1
+        else:
+            return self.canvas_2
+
+    @property
+    def pixel_label(self):
+        active = self.notebook.index(self.notebook.select())
+        if active == 0:
+            return self.pixel_label_1
+        else:
+            return self.pixel_label_2
 
 
 if __name__ == "__main__":
