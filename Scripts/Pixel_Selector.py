@@ -272,8 +272,6 @@ class Pixel_selector:
         Real_x = int(relative_x_position / self.display_scale)
         Real_y = int(relative_y_position / self.display_scale)
 
-        self.coords.append((Real_x, Real_y))
-
         for dx in range(-3, 4):
             for dy in range(-3, 4):
                 nx = Real_x + dx
