@@ -24,7 +24,7 @@ class Pixel_selector:
         self.target = tk.StringVar(value="Red")
         self.zoom_factor = 1
         self.zoom_step = 1.1
-
+        self.region_number = 0
         self.text = tk.StringVar(value="Text")
 
         container = tk.Frame(root, bg=PANEL)
@@ -168,6 +168,7 @@ class Pixel_selector:
             pady=5,
             command=self.load_image,
         )
+
         self.btn_1_tab_2.pack(side="left", pady=10, padx=40, fill="x")
         self.btn_2_tab_2 = tk.Button(
             btn_frame_2,
@@ -179,6 +180,7 @@ class Pixel_selector:
             pady=5,
             command=self.images_date,
         )
+
         self.btn_2_tab_2.pack(side="left", pady=10, padx=40, fill="x")
         self.btn_zoom_in = tk.Button(btn_frame_2, text="+", command=self.zoom_in)
         self.btn_zoom_in.pack(side="left", pady=10, padx=40, fill="x")
@@ -261,6 +263,7 @@ class Pixel_selector:
 
     def on_click(self, event):
         self.coords = []
+        self.region_number += 1
         h, w = self.image.shape[:2]
 
         canvas_x = self.canvas.canvasx(event.x)
@@ -332,6 +335,7 @@ class Pixel_selector:
                     "b_lab": float(b_lab),
                     "Type": self.types.get(),
                     "IDs": self.text.get(),
+                    "Number": self.region_number,
                 }
             )
         df_img = pd.DataFrame(records)
@@ -401,7 +405,6 @@ class Pixel_selector:
             return self.pixel_label_1
         else:
             return self.pixel_label_2
-
 
 if __name__ == "__main__":
     root = tk.Tk()
