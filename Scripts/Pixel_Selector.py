@@ -388,6 +388,8 @@ class Pixel_selector:
             self.image = img
             self.arr = np.array(img)
             self.image_path = images
+            self.hsv_arr = cv2.cvtColor(img, cv2.COLOR_RGB2HSV)
+            self.lab_arr = cv2.cvtColor(img, cv2.COLOR_RGB2LAB)
             self.extract_data()
 
     @property
@@ -406,8 +408,10 @@ class Pixel_selector:
         else:
             return self.pixel_label_2
 
+
 if __name__ == "__main__":
     root = tk.Tk()
     root.geometry("1300x700")
     app = Pixel_selector(root)
     root.mainloop()
+
