@@ -186,6 +186,3 @@ ggplot(
     legend.position = "top",
     title = element_text(size = 20)
   )
-
-
-kruskal.test(Value ~ month, data_type_3)
