@@ -15,7 +15,7 @@ def file_selection():
     return Path(folder)
 
 
-def image(folder, output_path = r"G:\Edgar_workspace\MogoMogo_2023\RGB_data.csv"):
+def image(folder, output_path = r"C:\Users\PardoEA\Downloads\RGB_data"):
 
     for i in folder.iterdir():
         site = i.parent.name
@@ -23,24 +23,20 @@ def image(folder, output_path = r"G:\Edgar_workspace\MogoMogo_2023\RGB_data.csv"
             img = Image.open(file).convert("RGB")
             arr = np.array(img)
 
-            arr = arr / 255.0
-
-            arr = np.power(arr, 2.2)
-
-            arr = (arr * 255.0).clip(0, 255)
-
             r, g, b = arr[:, :, 0], arr[:, :, 1], arr[:, :, 2]
             # Distribución de cada canal
            # mean_rgb = (0.299 * r.astype(float)+ 0.587 * g.astype(float)      + 0.114 * b.astype(float)   )
 
             datas = file.stem.split("_")
             IDs = datas[0]
-            Date = datas[2]
+            month = datas[2]
+            year = datas[3]
             df_img = pd.DataFrame(
                 {
                     "Filename": file.stem,
                     "site": site,
-                    "Date": Date,
+                    "month": month,
+                    "year": year,
                     "ID": IDs,
                     "R": r.flatten(),
                     "G": g.flatten(),
@@ -52,16 +48,19 @@ def image(folder, output_path = r"G:\Edgar_workspace\MogoMogo_2023\RGB_data.csv"
 
             pq.write_to_dataset(
             table,
-            root_path="dataset_pixels",
+            output_path,
              partition_cols=["ID"]
             )
             print(f"Processed {file.name}: {len(df_img):,} pixels")
 
-
+ 
 
 def main():
     folder = file_selection()
     image(folder)
+
+
+main()
 
 
 main()
