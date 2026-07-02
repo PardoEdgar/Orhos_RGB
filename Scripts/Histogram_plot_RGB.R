@@ -6,23 +6,22 @@ data <- open_dataset(path)
 
 
 data <- data |>
-  select(ID, month, year, R,G,B) |> 
-  collect() |> sample_n(1000000) 
+  select(ID, month, year, R,G,B) |> collect() |> sample_n(1000)
 
 data$R_norm  <- data$R/255
 data$G_norm <- data$G/255
 data$B_norm  <- data$B/255
 
 
-angular_error <- function(R,G,B,ref=c(1,1,1)) {
-    dot_product <- R * ref[1] +  G * ref[2] + B * ref[3]
-    norm_vector <- sqrt(R^2 +  G^2 + B^2 )
+angular_error <- function(R_norm,G_norm,B_norm,ref=c(1,1,1)) {
+    dot_product <- R_norm * ref[1] +  G_norm * ref[2] +B_norm * ref[3]
+    norm_vector <- sqrt(R_norm^2 +  G_norm^2 + B_norm^2 )
     norm_reference <- sqrt( ref[1]^2 +  ref[2]^2 + ref[3]^2 )
-    cos_theta = dot_product / norm_vector * norm_reference
+    cos_theta = dot_product / (norm_vector * norm_reference)
     cos_theta <- pmin(1, pmax(-1, cos_theta))
     acos(cos_theta) 
 }
-data <- data |>  mutate(angular_error = angular_error(R,G,B))
+data <- data |>  mutate(angular_error = angular_error(R_norm,G_norm,B_norm))
 
 data_long <- data |> 
   pivot_longer(
