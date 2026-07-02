@@ -4,9 +4,27 @@ path <- "C:/Users/PardoEA/Downloads/RGB_data"
 
 data <- open_dataset(path)
 
-data_long <- data |>
+
+data <- data |>
   select(ID, month, year, R,G,B) |> 
-  collect() |> sample_n(1000000) |>
+  collect() |> sample_n(1000000) 
+
+data$R_norm  <- data$R/255
+data$G_norm <- data$G/255
+data$B_norm  <- data$B/255
+
+
+angular_error <- function(R,G,B,ref=c(1,1,1)) {
+    dot_product <- R * ref[1] +  G * ref[2] + B * ref[3]
+    norm_vector <- sqrt(R^2 +  G^2 + B^2 )
+    norm_reference <- sqrt( ref[1]^2 +  ref[2]^2 + ref[3]^2 )
+    cos_theta = dot_product / norm_vector * norm_reference
+    cos_theta <- pmin(1, pmax(-1, cos_theta))
+    acos(cos_theta) 
+}
+data <- data |>  mutate(angular_error = angular_error(R,G,B))
+
+data_long <- data |> 
   pivot_longer(
     cols = c(R, G, B),
     names_to = "Channel",
@@ -41,19 +59,6 @@ ggplot(data_long, aes(x = Value, color = month_year)) +
   xlab("Pixel intensity (0-255)") +
   ylab("Frequency of observations") +
   theme_classic()
-
-data_long$R  <- data_long$R/255
-data_long$R  <- data_long$G/255
-data_long$R  <- data_long$B/255
-
-angular_error <- function(R,G,B,ref=c(1,1,1)) {
-    dot_product <- R * ref[1] =  R * ref[2] = R * ref[3]
-    norm_vector <- sqrt(R^2 +  G^2 + B^2 )
-    norm_reference <- sqrt( ref[1]^2 +  ref[2]^2 + ref[3]^2 )
-    cos_theta = dot_product / norm_vector * norm_reference
-    acos(cos_theta) * 180 / pi
-}
-data_long <- data_long |>  mutate(angular_error = angular_error(R,G,B))
 
 
 ggplot(data_long, aes(x = angular_error, color = month_year)) +
