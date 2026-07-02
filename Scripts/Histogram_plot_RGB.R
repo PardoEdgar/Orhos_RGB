@@ -41,3 +41,24 @@ ggplot(data_long, aes(x = Value, color = month_year)) +
   xlab("Pixel intensity (0-255)") +
   ylab("Frequency of observations") +
   theme_classic()
+
+data_long$R  <- data_long$R/255
+data_long$R  <- data_long$G/255
+data_long$R  <- data_long$B/255
+
+angular_error <- function(R,G,B,ref=c(1,1,1)) {
+    dot_product <- R * ref[1] =  R * ref[2] = R * ref[3]
+    norm_vector <- sqrt(R^2 +  G^2 + B^2 )
+    norm_reference <- sqrt( ref[1]^2 +  ref[2]^2 + ref[3]^2 )
+    cos_theta = dot_product / norm_vector * norm_reference
+    acos(cos_theta) * 180 / pi
+}
+data_long <- data_long |>  mutate(angular_error = angular_error(R,G,B))
+
+
+ggplot(data_long, aes(x = angular_error, color = month_year)) +
+  geom_density() +
+  scale_color_manual(values = colors) +
+  xlab("Angular error (0-55)") +
+  ylab("Frequency of observations") +
+  theme_classic()
